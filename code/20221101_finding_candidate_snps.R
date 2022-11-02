@@ -8,6 +8,7 @@ chrs <- c('2L', '2R', '3L', '3R', '4', 'X')
 signCut <- 1e-09
 nonSignCut <- 1e-4
 
+# Sig interaction and sig in HS
 binGlmScan_contTime_param1234_200615 %>% filter(`generation:treatment_p` < signCut, CHROM %in% chrs, emTrend.HS_p < nonSignCut) %>% count
 
 
