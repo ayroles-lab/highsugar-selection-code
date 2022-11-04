@@ -19,7 +19,7 @@ library(extrafont)
 # p_int <- 10^-seq(10.5, 12, by = .2)
 {
   #p_int <- sort(c(10^(seq(-9, -14, length.out = 4)), 8*10^-12))
-  p_int = c(1*10^-14, 5*10^-13, 8*10^-12, 2.15*10^-11, 1*10^-9)
+  p_int = c(1*10^-14, 5*10^-13, 8*10^-12, 1*10^-10, 1*10^-9)
   titleCols <- brewer.pal(n = length(p_int), name = 'Spectral')
   col.treat <- c(wes_palette('Darjeeling1', 1), 'deepskyblue2')
   dat = vector("list", length(p_int))
@@ -63,112 +63,99 @@ library(extrafont)
       ggtitle(bquote(SNPs ~ with ~ p[int] ~ '>' ~ .(p_int[i]))) + theme_tufte()
       if(i < length(p_int)) g[[i]] = g[[i]] + theme(legend.position = "none")
   }
-  panel_plot = plot_grid(plotlist = g, ncol = 2, nrow = 3, labels = 1:5)
-  save_plot("../figures/sequential_PCA.png", panel_plot, base_height = 3.2, base_asp = 1.2, ncol = 2, nrow = 3)
 }
-#New fig2
+
+######## New Manhatan plot 221103 ############
+# Fig 2D
+source("utils.R")
+load('../data/201001_alleFreqPC_allSNPs.RData')
+summary(allSNPs.pc)
+
+library(wesanderson)
+library(tidyverse)
+library(ggthemes)
+library(cowplot)
 library(grid)
-load('../data/190916_maf05SNPs_freqPCs.RData')
-load('../data/190427_mergedFreqsANDnrSamples_unionSNPs.RData')
-samples <- rownames(allAbove.pc$x)
-t <- as.numeric(sub('G(.*)_.*', '\\1', samples))
-pop <- sub('.*_(.*)', '\\1', samples)
-dat <- data.frame(allAbove.pc$x)
-dat$pop <- pop
-dat$t <- t
-treat <- rep('Control', nrow(dat))
-treat[grep(pattern = 'N4|N5|N6', x = pop)] <- 'High Sugar'
-dat$treat <- factor(treat, levels = c('High Sugar', 'Control')) #To set the colors
-dat$PC1 <- -dat$PC1 #Just flipping PC1 for visualization
 
-#Trying with the var expl as inset
-col.treat <- c(wes_palette('Darjeeling1', 1), 'deepskyblue2')
-vp <- viewport(width = 0.3, height = 0.33, x = 0.205, y = 0.83)
-
-pc <- ggplot(dat, aes(x = PC1, y = PC2, group = pop, colour = treat)) +
-  geom_line(size = 2) + geom_point(size = 8, aes(shape = factor(t))) +
-  scale_colour_manual(name = "treat", values = col.treat) +
-  theme(plot.title = element_text(hjust = 0.5, size = 25),
-        legend.title=element_text(size=35,face="bold"),
-        legend.text=element_text(size=30),
-        axis.text=element_text(size=25),
-        axis.title=element_text(size=28,face="bold"),
-        strip.text.y = element_text(size = 20)) + #legend.justification = c(1,.2)
-  guides(colour=guide_legend(title="Treatment"), shape = guide_legend(title="Generation"))
-
-eig <- allAbove.pc$sdev^2
-varExpl <- eig/sum(eig)
-dat <- data.frame(pc = 1:length(varExpl), varExpl = varExpl)
-pc.var <- ggplot(dat, aes(x = pc, y = varExpl, group = 1)) + geom_bar(stat = "identity") +
-  xlab('PC') + ylab('Variance Explained') +
-  theme(plot.title = element_text(hjust = 0.5, size = 25),
-        axis.text=element_text(size=25),
-        axis.title=element_text(size=28,face="bold"),
-        strip.text.y = element_text(size = 20))
-
-png('../figures/PCs12_inset_v2.png', width = 1600, height = 1000)
-print(pc)
-print(pc.var, vp = vp)
-dev.off()
-
-#Manhattan
-source('utils.R')
-load('../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
-chrs <- c('2L', '2R', '3L', '3R', '4', 'X', 'Y')
-binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in% chrs, ]
+load(
+    "../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData"
+)
+chrs <- c("2L", "2R", "3L", "3R", "4", "X")
+binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in%
+    chrs, ]
 
 ylim <- c(0, 60)
-nonSignCut <- 1e-4
+nonSignCut <- 1e-04
 signCut <- 8e-12
 p <- binGlmScan_contTime_param1234_200615$`generation:treatment_p`
 p[binGlmScan_contTime_param1234_200615$emTrend.HS_p > nonSignCut] <- 1
-col <- rep('black', nrow(binGlmScan_contTime_param1234_200615))
-col[binGlmScan_contTime_param1234_200615$emTrend.C_p > nonSignCut] <- wes_palette('Darjeeling1', 1)  #C_p > nonSignCut => HS only signals
-col[binGlmScan_contTime_param1234_200615$`generation:treatment_p` > signCut] <- 'grey'
-png('../figures/manhattan_pInt_colByTreatSlopeP_HSonly_v3.png', 1600, 1200)
-par(mar = c(5,5,4,2))
-plot.manhattan3(pos = binGlmScan_contTime_param1234_200615$POS,
-                chr = binGlmScan_contTime_param1234_200615$CHROM,
-                y = p, col = col, ylim = ylim)
-legend('topleft', c('High Sugar', 'Both Treatments'), col = c(pal[1], 'black'), pch = 19, cex = 3,
-       title = expression(bold('Selection Response')))
-abline(h = -log10(signCut), lty = 2, lwd = 2)
-mtext(expression('-log10(' ~ p[int] ~ ')'), side = 2, cex = 2, line = 2.7)
-dev.off()
+binGlmScan_contTime_param1234_200615$p = p
 
-#Examples
-binGlmScan_contTime_param1234_200615[order(p), ] |> head()
-f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '3R' & freqs.merge_union_190426$POS == 24624973, ]
-# f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '3R' & freqs.merge_union_190426$POS == 24632146, ]
-png(paste0('../figures/freqEx_', f$CHROM, f$POS, '_v3.png'), 1200, 1000)
-plot.freqVStime_v2(f[,9:32], lines = T, cex.legend = 3, pal = col.treat, cex.points = 5, legend = F, ylim = c(0,1))
-dev.off()
+chrs <- c("2L", "2R", "3L", "3R", "4", "X")
+binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in%
+    chrs, ]
 
-#only HS
-binGlmScan_contTime_param1234_200615[p < 1e-30 & binGlmScan_contTime_param1234_200615$CHROM == '2R', ]
-f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '2R' & freqs.merge_union_190426$POS == 12422213, ]
-png(paste0('../figures/freqEx_', f$CHROM, f$POS, '.png'), 1200, 1000)
-plot.freqVStime_v2(f[,9:32], lines = T, cex.legend = 3, pal = col.treat, cex.points = 5, legend = F)
-dev.off()
+ylim <- c(0, 60)
+nonSignCut <- 1e-04
+signCut <- 8e-12
+p <- binGlmScan_contTime_param1234_200615$`generation:treatment_p`
+p[binGlmScan_contTime_param1234_200615$emTrend.HS_p > nonSignCut] <- 1
+binGlmScan_contTime_param1234_200615$p = p
 
-#only HS ex 2
-binGlmScan_contTime_param1234_200615[p < 1e-21
-                                     & binGlmScan_contTime_param1234_200615$CHROM == '2L'
-                                     & binGlmScan_contTime_param1234_200615$POS > .85e7
-                                     & binGlmScan_contTime_param1234_200615$POS < .95e7, ]
-# f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '2L' & freqs.merge_union_190426$POS == 8712764, ]
-f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '2L' & freqs.merge_union_190426$POS == 8712101, ]
-png(paste0('../figures/freqEx_', f$CHROM, f$POS, '.png'), 1200, 1000)
-plot.freqVStime_v2(f[,9:32], lines = T, cex.legend = 3, pal = col.treat, cex.points = 5, legend = F)
-dev.off()
+nonSignCut <- 1e-04
+signCut <- 8e-12
 
-#only HS ex 3
-binGlmScan_contTime_param1234_200615[p < 1e-15
-                                     & binGlmScan_contTime_param1234_200615$CHROM == '3R'
-                                     & binGlmScan_contTime_param1234_200615$POS > 2.6e7
-                                     & binGlmScan_contTime_param1234_200615$POS < 2.8e7, ]
-# f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '2L' & freqs.merge_union_190426$POS == 8712764, ]
-f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '3R' & freqs.merge_union_190426$POS == 27119027, ]
-png(paste0('../figures/freqEx_', f$CHROM, f$POS, '_v3.png'), 1200, 1000)
-plot.freqVStime_v2(f[,9:32], lines = T, cex.legend = 3, pal = col.treat, cex.points = 5, legend = F, ylim = c(0,1))
-dev.off()
+gwas_data_load = binGlmScan_contTime_param1234_200615
+gwas_data_load$chr = factor(binGlmScan_contTime_param1234_200615$CHROM, levels = chrs)
+gwas_data_load$bp = binGlmScan_contTime_param1234_200615$POS
+sig_data <- gwas_data_load %>% 
+  subset(p < signCut)
+notsig_data <- gwas_data_load %>% 
+  subset(p >= signCut) %>%
+  group_by(chr) %>% 
+  sample_frac(0.2)
+gwas_data <- bind_rows(sig_data, notsig_data)
+
+data_cum <- gwas_data %>% 
+  group_by(chr) %>% 
+  summarise(max_bp = max(bp)) %>% 
+  mutate(bp_add = lag(cumsum(max_bp), default = 0)) %>% 
+  select(chr, bp_add)
+
+gwas_data <- gwas_data %>% 
+  inner_join(data_cum, by = "chr") %>% 
+  mutate(bp_cum = bp + bp_add)
+
+axis_set <- gwas_data %>% 
+  group_by(chr) %>% 
+  summarize(center = mean(bp_cum))
+
+ylim <- gwas_data %>% 
+  filter(p == min(p)) %>% 
+  mutate(ylim = abs(floor(log10(p))) + 2) %>% 
+  pull(ylim)
+
+manhplot <- ggplot(gwas_data, aes(x = bp_cum, y = -log10(p), 
+                                  color = chr)) +
+  geom_point(alpha = 0.75, size = 0.25) +
+  geom_hline(data = data.frame(p_int = p_int), aes(yintercept = -log10(p_int)), color = "black") + 
+  geom_hline(yintercept = -log10(8*10^-12), color = "tomato3") + 
+  scale_x_continuous(label = axis_set$chr, breaks = axis_set$center) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, ylim), breaks = seq(0, 60, 10)) +
+  scale_color_manual(values = rep(c("#276FBF", "#183059"), unique(length(axis_set$chr)))) +
+  scale_size_continuous(range = c(0.5,3)) +
+  labs(x = "Chromossome", 
+       y = expression("-log10(" ~ p[int] ~ ")")) + 
+  theme_tufte() +
+  theme( 
+    legend.position = "none",
+    #panel.grid.major.x = element_blank(),
+    #panel.grid.minor.x = element_blank(),
+    #axis.title.y = element_markdown(),
+    axis.text.x = element_text(size = 8, vjust = 0.5),
+    axis.line = element_line(color = 'black')
+  )
+
+  g[[6]] = manhplot
+  panel_plot = plot_grid(plotlist = g, ncol = 2, nrow = 3, labels = 1:5)
+  save_plot("../figures/sequential_PCA.png", panel_plot, base_height = 3.2, base_asp = 1.2, ncol = 2, nrow = 3)
