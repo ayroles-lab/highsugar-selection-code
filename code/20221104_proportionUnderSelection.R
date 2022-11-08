@@ -1,6 +1,7 @@
 load('../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
 load('../data/200618_binGlmScan_slopePerTreat_GRangesFormat.RData')
 signCut <- 8e-12
+#signCut <- 10^-9
 nonSignCut <- 1e-4
 p <- binGlmScan_contTime_param1234_200615.gr$`generation:treatment_p`
 p[binGlmScan_contTime_param1234_200615.gr$emTrend.HS_p > nonSignCut] <- 1

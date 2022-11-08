@@ -20,30 +20,87 @@ nonSignCut <- 1e-4
 p <- binGlmScan.reOrder$`generation:treatment_p`
 p[binGlmScan.reOrder$emTrend.HS_p > nonSignCut] <- 1
 
-#Prettier version
-library(ggplot2)
-library(ggpmisc)
 dat <- data.frame(x = abs(wgscan.ihs$ihs$IHS), y = -log10(p))
 my.formula <- y~x
-png('../figures/ihs_vs_pInt_exclConly_SNPmissing08_indMissing05_v2.png', 1000, 1000)
-ggplot(dat, aes(x=x, y=y)) +
+cor.test(dat$x, dat$y)
+high_sugar = ggplot(dat, aes(x=x, y=y)) +
   geom_point() +
-  geom_smooth(method=lm,  linetype="dashed") + theme_classic() +
+  geom_smooth(method=lm,  linetype="dashed") +
   stat_poly_eq(aes(label = paste(..rr.label..)),
-               label.x = .86, label.y = 0.35,
-               formula = my.formula, parse = TRUE, size = 15) +
+               label.x = 'right', label.y = 0.7, rr.digits = 4,
+               formula = my.formula, parse = TRUE, size = 8) +
   stat_fit_glance(method = 'lm',
                   method.args = list(formula = my.formula),
                   geom = 'text',
                   aes(label = paste("p-value = ", signif(..p.value.., digits = 2), sep = "")),
-                  label.x = 'right', label.y = 10, size = 15) +
+                  label.x = 'right', label.y = 25, size = 8) +
+  theme_tufte() + 
+  scale_y_continuous(limits = c(0, 45)) +
   theme(plot.title = element_text(hjust = 0.5, size = 25),
         legend.title=element_blank(),
         legend.text=element_text(size=30),
         axis.text=element_text(size=25),
+        axis.title=element_text(size=28,face="bold"),
+        axis.line = element_line(color = 'black')) +
+  xlab('abs(iHS)') + ylab('-log10(p)') + ggtitle(expression('A. ' ~ p[int] ~ ' by iHS'))
+
+#Time p
+mod <- lm(-log10(binGlmScan.reOrder$generation_p) ~ abs(wgscan.ihs$ihs$IHS))
+summary(mod)
+#C p
+mod <- lm(-log10(binGlmScan.reOrder$emTrend.C_p) ~ abs(wgscan.ihs$ihs$IHS))
+summary(mod)
+dat <- data.frame(x = abs(wgscan.ihs$ihs$IHS), y = -log10(binGlmScan.reOrder$emTrend.C_p))
+my.formula <- y~x
+control = ggplot(dat, aes(x=x, y=y)) +
+  geom_point() +
+  geom_smooth(method=lm,  linetype="dashed") +
+  stat_poly_eq(aes(label = paste(..rr.label..)),
+               label.x = 'right', label.y = 0.7, rr.digits = 4,
+               formula = my.formula, parse = TRUE, size = 8) +
+  stat_fit_glance(method = 'lm',
+                  method.args = list(formula = my.formula),
+                  geom = 'text',
+                  aes(label = paste("p-value = ", signif(..p.value.., digits = 2), sep = "")),
+                  label.x = 'right', label.y = 25, size = 8) +
+  theme_tufte() + 
+  scale_y_continuous(limits = c(0, 45)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 25),
+        legend.title=element_blank(),
+        legend.text=element_text(size=30),
+        axis.line = element_line(color = 'black'),
+        axis.text=element_text(size=25),
         axis.title=element_text(size=28,face="bold")) +
-  xlab('abs(iHS)') + ylab('-log10(p)')
-dev.off()
+  xlab('abs(iHS)') + ylab('-log10(p)') + ggtitle(expression('B. ' ~ p[C] ~ ' by iHS'))
+
+#HS p
+# mod <- lm(-log10(binGlmScan.reOrder$emTrend.HS_p) ~ abs(wgscan.ihs$ihs$IHS))
+# summary(mod) #Huh
+# cor.test(-log10(binGlmScan.reOrder$emTrend.HS_p), abs(wgscan.ihs$ihs$IHS))
+
+# dat <- data.frame(x = abs(wgscan.ihs$ihs$IHS), y = -log10(binGlmScan.reOrder$emTrend.HS_p))
+# my.formula <- y~x
+# high_sugar = ggplot(dat, aes(x=x, y=y)) +
+#   geom_point() +
+#   geom_smooth(method=lm,  linetype="dashed") +
+#   stat_poly_eq(aes(label = paste(..rr.label..)),
+#                label.x = 'right', label.y = 0.7,
+#                formula = my.formula, parse = TRUE, size = 10) +
+#   stat_fit_glance(method = 'lm',
+#                   method.args = list(formula = my.formula),
+#                   geom = 'text',
+#                   aes(label = paste("p-value = ", signif(..p.value.., digits = 2), sep = "")),
+#                   label.x = 'right', label.y = 25, size = 10) +
+#   theme_tufte() + 
+#   theme(plot.title = element_text(hjust = 0.5, size = 25),
+#         legend.title=element_blank(),
+#         legend.text=element_text(size=30),
+#         axis.text=element_text(size=25),
+#         axis.title=element_text(size=28,face="bold"),
+#         axis.line = element_line(color = 'black')) +
+#   xlab('abs(iHS)') + ylab('-log10(p)') + ggtitle("A. Selection signal in HS")
+panel = high_sugar + control
+save_plot("../figures/ihs_vs_pInt_exclConly_SNPmissing08_indMissing05_HScontrasts_Ccontrast.png", panel, base_height = 8, ncol = 2, base_asp = 1)
 
 ###### Filter significant SNPs, check if their iHS is significant
 
@@ -51,5 +108,6 @@ dat <- data.frame(ihs = abs(wgscan.ihs$ihs$IHS),
                   ihs_logpvalue = wgscan.ihs$ihs$LOGPVALUE , 
                   regression_logpvalue = -log10(p)) %>% na.omit() %>%   
                   filter(regression_logpvalue > -log10(8*10^-12)) %>%
-                  mutate(ihs_sig = ihs_logpvalue > -log10(0.01)) %>%
+                  mutate(ihs_sig = ihs_logpvalue > -log10(0.05)) %>%
                   group_by(ihs_sig) %>% count()
+dat
