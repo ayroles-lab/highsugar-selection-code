@@ -36,11 +36,10 @@ p2 <- ggplot(dat, aes(x=value, fill=name)) + geom_histogram(alpha=1, closed="lef
         ylab('Number of SNPs') +
         xlab('Mean change in allele frequency') +
         theme_tufte() +
-        xlim(0, 0.75)         +
         theme(legend.position = "none") +
         ggtitle("B. Selected SNPs") +
         scale_y_continuous(expand = c(0,0)) +
-        scale_x_continuous(expand = c(0,0)) +
+        scale_x_continuous(expand = c(0,0), limits = c(0, 0.7)) +
         theme(axis.line = element_line(color = 'black'))
 
 #All SNPs
@@ -65,7 +64,7 @@ p1 <- ggplot(dat, aes(x=value, fill=name)) + geom_histogram(alpha=1, closed="lef
         theme(legend.position = c(0.7,.8)) +
         ggtitle('A. All SNPs') +
         scale_y_continuous(expand = c(0,0)) +
-        scale_x_continuous(expand = c(0,0)) +
+        scale_x_continuous(expand = c(0,0), limits = c(0, 0.7)) +
         theme(axis.line = element_line(color = 'black'))
 
 
