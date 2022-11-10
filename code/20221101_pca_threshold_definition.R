@@ -157,5 +157,6 @@ manhplot <- ggplot(gwas_data, aes(x = bp_cum, y = -log10(p),
   )
 
   g[[6]] = manhplot
+  g[[3]] = g[[3]] + theme(plot.background = element_rect(color = "tomato3", size = 3))
   panel_plot = plot_grid(plotlist = g, ncol = 2, nrow = 3, labels = 1:5)
   save_plot("../figures/sequential_PCA.png", panel_plot, base_height = 3.2, base_asp = 1.2, ncol = 2, nrow = 3)
