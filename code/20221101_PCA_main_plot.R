@@ -56,3 +56,20 @@ print(pc)
 print(pc.var, vp = vp)
 dev.off()
 }
+
+
+### PCs SI figure
+
+load('200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
+chrs <- c('2L', '2R', '3L', '3R', '4', 'X', 'Y')
+allSNPs.pc_load <- data.frame(CHROM = binGlmScan_contTime_param1234_200615$CHROM,
+                              POS = binGlmScan_contTime_param1234_200615$POS,
+                              allSNPs.pc$rotation)
+binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in% chrs, ]
+binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM != 'Y', ]
+allSNPs.pc_load <- allSNPs.pc_load[allSNPs.pc_load$CHROM %in% chrs, ]
+allSNPs.pc_load <- allSNPs.pc_load[allSNPs.pc_load$CHROM != 'Y', ]
+
+cor.test(-allSNPs.pc_load[,"PC1"], binGlmScan_contTime_param1234_200615$`generation_p`)
+cor.test(allSNPs.pc_load[,"PC2"], binGlmScan_contTime_param1234_200615$`generation:treatment_p`)
+cor.test(allSNPs.pc_load[,"PC2"], allSNPs.pc_load[,"PC1"])
