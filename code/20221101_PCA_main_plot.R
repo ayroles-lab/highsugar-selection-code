@@ -22,13 +22,18 @@ dat$PC1 <- -dat$PC1 #Just flipping PC1 for visualization
 
 #Trying with the var expl as inset
 # col.treat <- c(wes_palette('Darjeeling1', 1), 'deepskyblue2')
-col.treat <- c("#B3B3FF", "#FFD9B3")
+#col.treat <- c("#B3B3FF", "#FFD9B3")
+col.treat <- c(2, 1)
+
 vp <- viewport(width = 0.25, height = 0.33, x = 0.25, y = 0.8)
 
 pc <- ggplot(dat, aes(x = PC1, y = PC2, group = pop, colour = treat)) +
-  geom_line(size = 1, key_glyph = 'crossbar') + geom_point(size = 4, aes(shape = factor(t))) +
+  geom_line(size = 1.5, key_glyph = 'crossbar', color = "white") +
+  geom_line(size = 1, key_glyph = 'crossbar') + 
+  geom_point(size = 4, aes(shape = factor(t))) +
   scale_shape_manual(values = 15:18) +
   scale_colour_manual(name = "treat", values = col.treat) +
+  labs(x = "First principal component", y = "Second principal component") +
   theme_classic() +
   theme(plot.title = element_text(hjust = 0.5, size = 25),
         legend.title=element_text(size=8),
