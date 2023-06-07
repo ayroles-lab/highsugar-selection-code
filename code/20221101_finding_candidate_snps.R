@@ -1,5 +1,4 @@
 load('../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
-
 library(tidyverse)
 
 chrs <- c('2L', '2R', '3L', '3R', '4', 'X')

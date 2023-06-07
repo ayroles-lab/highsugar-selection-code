@@ -1,7 +1,7 @@
 ######## New Manhatan plot 221103 ############
 # Fig 2D
-source("utils.R")
-load('../data/201001_alleFreqPC_allSNPs.RData')
+source("code/utils.R")
+load('data/201001_alleFreqPC_allSNPs.RData')
 summary(allSNPs.pc)
 
 library(wesanderson)
@@ -11,7 +11,7 @@ library(cowplot)
 library(grid)
 
 load(
-    "../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData"
+    "data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData"
 )
 chrs <- c("2L", "2R", "3L", "3R", "4", "X")
 binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in%
@@ -79,26 +79,30 @@ manhplot <- ggplot(filter(gwas_data, p < signCut), aes(x = bp_cum, y = -log10(p)
   scale_size_continuous(range = c(0.5,3)) +
   labs(x = "Chromossome", 
        y = expression("-log10(" ~ p[int] ~ ")")) + 
-  theme_tufte() +
+  theme_classic() +
   theme( 
     legend.position = "none",
     #panel.grid.major.x = element_blank(),
     #panel.grid.minor.x = element_blank(),
-    #axis.title.y = element_markdown(),
-    axis.text.x = element_text(size = 8, vjust = 0.5),
-    axis.line = element_line(color = 'black')
+    #axis.title.y = element_markdown(),axis.line = element_line(color = 'black'), 
+    plot.title = element_text(size = 10), 
+    axis.text = element_text(size = 7), 
+    axis.text.x = element_text(size = 7, vjust = 0.5),
+    axis.title = element_text(size = 8),
+    legend.title = element_text(size = 8),
+    legend.text = element_text(size = 8)
   )
-save_plot("../figures/manhattan_pInt_HSonly_cut8e-12_ggplot.png", manhplot, base_height = 5)
+save_plot("figures/manhattan_pInt_HSonly_cut8e-12_ggplot.png", manhplot, base_height = 5)
 
 ######## Regression plots 221103 #################
-load('../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
-load('../data/190427_mergedFreqsANDnrSamples_unionSNPs.RData')
+load('data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')
+load('data/190427_mergedFreqsANDnrSamples_unionSNPs.RData')
 
 chrs <- c('2L', '2R', '3L', '3R', '4', 'X', 'Y')
 binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in% chrs, ]
 
 plotFreqVsTime = function(f){
-  col.treat <- c(wes_palette('Darjeeling1', 1), 'deepskyblue2')
+  col.treat <- c('DarkOrange', '#8A2BE2')
   lf = f %>% 
     select(contains("_N")) %>% 
     pivot_longer(G25_N5:G100_N6) %>% 
@@ -111,8 +115,13 @@ plotFreqVsTime = function(f){
     scale_y_continuous(limits = c(0,1)) +
     scale_color_manual(values = col.treat, name = "") +
     scale_shape_discrete(name = "") +
-    theme_tufte() + 
-    theme(axis.line = element_line(color = 'black')) +
+    theme_classic() + 
+    theme(axis.line = element_line(color = 'black'), 
+          plot.title = element_text(size = 10), 
+          axis.text = element_text(size = 7), 
+          axis.title = element_text(size = 8),
+          legend.title = element_text(size = 8),
+          legend.text = element_text(size = 8)) +
     labs(y = "Allele frequency", x = "Generation")
   p
 }
@@ -155,4 +164,8 @@ p3 = plotFreqVsTime(panelC) + ggtitle("C. HS only")
 library(patchwork)
 panel = (p1 + p2 + p3 + plot_layout(guides = 'collect')) / manhplot + ggtitle("D.") 
 
-save_plot("../figures/regressionExamples_manhattan_pInt_HSonly_cut8e-12.png", panel, base_height = 6)
+save_plot("figures/regressionExamples_manhattan_pInt_HSonly_cut8e-12.png", panel, 
+          base_height = 4, base_width = 7.2)
+
+
+
