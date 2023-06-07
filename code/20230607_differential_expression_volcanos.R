@@ -17,7 +17,6 @@ dat <- data.frame(tissue = rep(c('Body', "Head"),
 dat$sign <- 0
 dat$sign[dat$p_geno < DE.fdr] <- 1
 
-table(dat$sign, dat$tissue)
 
 g <- ggplot(data = dat, aes(x = lfc_geno, y = -log10(p_geno), color = sign)) +
   geom_point(size = 0.8) + theme_classic() +
