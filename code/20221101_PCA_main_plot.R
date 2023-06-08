@@ -27,9 +27,8 @@ col.treat <- c(2, 1)
 
 vp <- viewport(width = 0.25, height = 0.33, x = 0.25, y = 0.8)
 
-pc <- ggplot(dat, aes(x = PC1, y = PC2, group = pop, colour = treat)) +
-  geom_line(size = 1.5, key_glyph = 'crossbar', color = "white") +
-  geom_line(size = 1, key_glyph = 'crossbar') + 
+pc <- ggplot(dat, aes(x = PC1, y = PC2, group = pop, color = treat)) +
+  geom_line(size = 1, key_glyph = draw_key_rect) + 
   geom_point(size = 4, aes(shape = factor(t))) +
   scale_shape_manual(values = 15:18) +
   scale_colour_manual(name = "treat", values = col.treat) +

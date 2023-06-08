@@ -27,7 +27,7 @@ col.treat <- c("#B3B3FF", "#FFD9B3")
 
 p = ggplot(data = dat, aes(x = dist_bin, y = R.2, fill = treat)) +
   geom_boxplot(width = .5, outlier.shape = NA) +
-  ylab(expression(R^2)) + xlab('Maximum Distance (bp)') +
+  ylab(expression('Linkage disequilibrium (' ~ R^2 ~ ')')) + xlab('Maximum Distance (bp)') +
   scale_x_discrete(labels= seq(50, 500, 50)) +
   theme_classic() + scale_fill_manual(name = "treat", values = col.treat) +
   theme(plot.title = element_text(hjust = 0., size = 30, face = 'bold'),
@@ -83,7 +83,7 @@ dat$name <- factor(dat$name, levels = c('g1', 'g11', 'g25', 'g100'))
 
 # png('../results/2020-11-25_msFigs/MAFdistr_v1.png', 1200, 1000)
 p = ggplot(dat, aes(x = value, ill = name, color = name)) +
-  geom_density(alpha = .5) + theme_classic() +
+  geom_density(alpha = .5, key_glyph = "abline") + theme_classic() +
   scale_color_discrete(labels = c(1, 11, 25, 100)) +
   scale_x_continuous(limits = c(0, 0.5)) + scale_y_continuous(limits = c(0, 4.5)) + 
   theme(plot.title = element_text(hjust = 0., size = 25),

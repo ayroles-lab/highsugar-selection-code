@@ -2,8 +2,8 @@
 #More stringent set of candidate pairs
 # load('210126_chisqLinkageClumps_distantChisqP5.7e-08_corP0.01_clumpDist250000_clumpChisqP1e-05.RData')
 # load('210126_chisqLinkageClumps_distantChisqP5.7e-08_corP1e-05_clumpDist250000_clumpChisqP1e-05.RData')
-load('../archive/R/210126_chisqLinkageClumps_distantChisqP5.7e-08_corP0.001_clumpDist250000_clumpChisqP1e-05.RData')
-load('../data/200618_binGlmScan_slopePerTreat_GRangesFormat.RData')
+load('archive/R/210126_chisqLinkageClumps_distantChisqP5.7e-08_corP0.001_clumpDist250000_clumpChisqP1e-05.RData')
+load('data/200618_binGlmScan_slopePerTreat_GRangesFormat.RData')
 
 #Pick the clumps with > n clumped SNPs at both ends
 n <- 2
@@ -42,7 +42,7 @@ chrs <- c('2L', '2R', '3L', '3R')
 binGlm.chrs <- as.character(rep.int(binGlmScan_contTime_param1234_200615.gr@seqnames@values, binGlmScan_contTime_param1234_200615.gr@seqnames@lengths))
 binGlmScan_contTime_param1234_200615.gr <- binGlmScan_contTime_param1234_200615.gr[binGlm.chrs %in% chrs]
 binGlmScan_contTime_param1234_200615.gr$chr <- as.character(rep.int(binGlmScan_contTime_param1234_200615.gr@seqnames@values, binGlmScan_contTime_param1234_200615.gr@seqnames@lengths))
-binGlmScan_chrs.gr <- unlist(reduce(split(binGlmScan_contTime_param1234_200615.gr, ~chr), min.gapwidth = 1e6))
+binGlmScan_chrs.gr <- unlist(GenomicRanges::reduce(split(binGlmScan_contTime_param1234_200615.gr, ~chr), min.gapwidth = 1e6))
 myGenome.rcircos <- data.frame(Chromosome = binGlmScan_chrs.gr@seqnames@values,
                                ChromStart = 0, #binGlmScan_chrs.gr@ranges@start,
                                ChromEnd = binGlmScan_chrs.gr@ranges@start + binGlmScan_chrs.gr@ranges@width,
@@ -81,7 +81,7 @@ for (i in 2:length(clumps)) {
 # png(paste('../results/2021-01-26_newClumps/circos_distantChisqP5.7e-08_corP0.01_clumpDist250000_clumpChisqP1e-05_atleast5snps.png'), 1200, 1200)
 # png(paste('../results/2021-01-26_newClumps/circos_distantChisqP5.7e-08_corP1e-05_clumpDist250000_clumpChisqP1e-05_atleast2snps.png'), 1200, 1200)
 
-png(paste('../figures/2023-02-13_newClumps-circos_distantChisqP5.7e-08_corP0.001_clumpDist250000_clumpChisqP1e-05_atleast3snps_v3.png'), 1000, 1000)
+png(paste('figures/2023-02-13_newClumps-circos_distantChisqP5.7e-08_corP0.001_clumpDist250000_clumpChisqP1e-05_atleast3snps_v3.png'), 6, 6, unit = 'in', res = 800)
 par(mar=c(0, 0, 0, 0))
 RCircos.Set.Core.Components(myGenome.rcircos, tracks.inside = 1, tracks.outside = 0)
 RCircos.Set.Plot.Area()

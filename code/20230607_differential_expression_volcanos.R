@@ -54,18 +54,22 @@ dat.obs = bind_rows(Head = overlap_swapExpSelection_DEfdr01_varyingSelP_head,
 g.geno_facet <- ggplot(data = dat.perm, 
                        aes(y = nOverlapSNPs_geno.perm/nSNPs,
                            x = factor(-log10(p)))) +
-  geom_boxplot(key_glyph = 'rect') +
+  geom_boxplot(key_glyph = 'rect', outlier.size = 0.3) +
+  geom_point(data = dat.obs,
+            mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
+            group = 1, size = 1, color = 2) +
   geom_line(data = dat.obs,
             mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
-            group = 1, size = 1, color = 2) + 
+            group = 1, size = 0.7, color = 2) + 
   facet_grid(cols = vars(tissue)) +
   theme_classic() +
   theme(legend.position = 'none',
         axis.text=element_text(size=8),
         axis.title=element_text(size=8),
         plot.title = element_text(size = 10),
-        plot.subtitle = element_text(size = 8)) + ylim(ylim) +
+        plot.subtitle = element_text(size = 8)) + ylim(c(0.06, 0.22)) +
   ylab('Fraction of selected SNPs in DE genes') + xlab(expression('-log10(' ~ p[int] ~ ')')) 
   
 save_plot("figures/DE.png", g + ggtitle("A.") + g.geno_facet + ggtitle("B.") ,
           base_width = 5.5, base_height = 3 )
+

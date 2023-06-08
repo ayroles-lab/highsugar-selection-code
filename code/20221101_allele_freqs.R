@@ -70,5 +70,5 @@ p1 <- ggplot(dat, aes(x=value, fill=name)) +
 library(patchwork)
 panel = (p1/p2)
 library(cowplot)
-save_plot("figures/delta_af.png", panel, base_width = 5.5, base_height = 4)
+save_plot("figures/delta_af.png", panel, base_width = 3.5, base_height = 2.8)
 
