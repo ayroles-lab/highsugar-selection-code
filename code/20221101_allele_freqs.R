@@ -68,7 +68,9 @@ p1 <- ggplot(dat, aes(x=value, fill=name)) +
         scale_x_continuous(expand = c(0,0), limits = c(0, 0.7)) 
 
 library(patchwork)
-panel = (p1/p2)
+af_panel = (p1/p2)
 library(cowplot)
-save_plot("figures/delta_af.png", panel, base_width = 3.5, base_height = 2.8)
+save_plot("figures/delta_af.png", af_panel, base_width = 3.5, base_height = 2.8)
 
+save_plot("figures/delta_af_poster.png", af_panel, base_width = 6, base_height = 5)
+save_plot("figures/delta_af_poster.pdf", af_panel, base_width = 6, base_height = 5)

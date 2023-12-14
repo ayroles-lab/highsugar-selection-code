@@ -62,7 +62,27 @@ print(pc.var, vp = vp)
 dev.off()
 }
 
+pc.poster <- ggplot(dat, aes(x = PC1, y = PC2, group = pop, color = treat)) +
+  geom_line(size = 1, key_glyph = draw_key_rect) + 
+  geom_point(size = 4, aes(shape = factor(t))) +
+  scale_shape_manual(values = 15:18) +
+  scale_colour_manual(name = "treat", values = col.treat) +
+  labs(x = "First principal component", y = "Second principal component") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5, size = 25),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        axis.text=element_text(size=8),
+        axis.title=element_text(size=10),
+        strip.text.y = element_text(size = 10),
+        axis.line = element_line(color = 'black'),
+        legend.position = c(0.9, 0.5)) + #legend.justification = c(1,.2)
+  guides(colour=guide_legend(title="Treatment"), shape = guide_legend(title="Generation")) 
 
+save_plot("figures/PCs-poster.pdf", pc.poster ,
+          base_width = 7.8, base_height = 5 )
+save_plot("figures/PCs-poster.png", pc.poster ,
+          base_width = 7.8, base_height = 5 )
 ### PCs SI figure
 
 load('200615_binGlmScan_contTimeParam1234_slopePerTreat.RData')

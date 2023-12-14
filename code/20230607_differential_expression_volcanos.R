@@ -1,3 +1,10 @@
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(patchwork)
+library(dplyr)
+
+
 #Volcano plots
 options(stringsAsFactors = F)
 swapExp_DESeqRes_body <- read.table('data/Results_DESeq_SWAPexperiment_body_May12.txt', header = T)
@@ -19,7 +26,7 @@ dat$sign[dat$p_geno < DE.fdr] <- 1
 
 
 g <- ggplot(data = dat, aes(x = lfc_geno, y = -log10(p_geno), color = sign)) +
-  geom_point(size = 0.8) + theme_classic() +
+  geom_point(size = 0.00001, shape = 19) + theme_classic() +
   facet_grid(cols = vars(tissue)) +
   # scale_color_manual(values = c('0' = 'black', '1' = 'red')) +
   theme(legend.position = 'none',
@@ -39,11 +46,7 @@ dev.off()
 load('archive/R/210209_swapExp_marginalDEfdr01_varyingPint_overlap_cOnlyExcluded_w5000.RData')
 load('archive/R/210209_swapExp_marginalDEfdr01_varyingPint_overlap_cOnlyExcluded_permBody_w5000.RData')
 load('archive/R/210209_swapExp_marginalDEfdr01_varyingPint_overlap_cOnlyExcluded_permHead_w5000.RData')
-library(ggplot2)
-library(ggpubr)
-library(cowplot)
-library(patchwork)
-library(dplyr)
+
 
 dat.perm = bind_rows(Head = overlap_swapExpSelection_DEfdr01_varyingSelP_head.perm, 
                      Body = overlap_swapExpSelection_DEfdr01_varyingSelP_body.perm, 
@@ -54,13 +57,13 @@ dat.obs = bind_rows(Head = overlap_swapExpSelection_DEfdr01_varyingSelP_head,
 g.geno_facet <- ggplot(data = dat.perm, 
                        aes(y = nOverlapSNPs_geno.perm/nSNPs,
                            x = factor(-log10(p)))) +
-  geom_boxplot(key_glyph = 'rect', outlier.size = 0.3) +
+  geom_boxplot(key_glyph = 'rect', linewidth = 0.3, outlier.size = 0.1) +
   geom_point(data = dat.obs,
             mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
             group = 1, size = 1, color = 2) +
   geom_line(data = dat.obs,
             mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
-            group = 1, size = 0.7, color = 2) + 
+            group = 1, linewidth = 0.7, color = 2) + 
   facet_grid(cols = vars(tissue)) +
   theme_classic() +
   theme(legend.position = 'none',
@@ -73,3 +76,31 @@ g.geno_facet <- ggplot(data = dat.perm,
 save_plot("figures/DE.png", g + ggtitle("A.") + g.geno_facet + ggtitle("B.") ,
           base_width = 5.5, base_height = 3 )
 
+
+g.geno_poster <- ggplot(data = dat.perm, 
+                       aes(y = nOverlapSNPs_geno.perm/nSNPs,
+                           x = factor(-log10(p)))) +
+  geom_boxplot(key_glyph = 'rect', outlier.size = 0.3) +
+  geom_point(data = dat.obs,
+            mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
+            group = 1, size = 1, color = 2) +
+  geom_line(data = dat.obs,
+            mapping = aes(y = nOverlapSNPs_geno/nSNPs, x = factor(-log10(p))), 
+            group = 1, size = 0.7, color = 2) + 
+  scale_y_continuous(breaks=c(0, 0.5, 0.1, 0.15, 0.2)) +
+  facet_grid(cols = vars(tissue)) +
+  theme_classic() +
+  theme(legend.position = 'none',
+        axis.text=element_text(size=14),
+        axis.title=element_text(size=16),
+        plot.title = element_text(size = 16),
+        plot.subtitle = element_text(size = 14),
+        strip.text.x = element_text(size = 12)) + ylim(c(0.06, 0.22)) +
+  ylab('Fraction of selected SNPs in DE genes') + xlab(expression('-log10(' ~ p[int] ~ ')')) 
+
+    
+save_plot("figures/DE-poster.pdf", g.geno_poster ,
+          base_width = 7.8, base_height = 5 )
+              
+save_plot("figures/DE-poster.png", g.geno_poster ,
+          base_width = 7.8, base_height = 5 )

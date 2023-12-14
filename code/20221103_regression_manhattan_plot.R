@@ -60,6 +60,7 @@ gwas_data <- gwas_data %>%
   mutate(bp_cum = bp + bp_add)
 
 axis_set <- gwas_data %>% 
+  filter(chr != 4) %>%
   group_by(chr) %>% 
   summarize(center = mean(bp_cum))
 
@@ -68,16 +69,16 @@ ylim <- gwas_data %>%
   mutate(ylim = abs(floor(log10(p))) + 2) %>% 
   pull(ylim)
 
-manhplot <- ggplot(filter(gwas_data, p < signCut), aes(x = bp_cum, y = -log10(p), 
+manhplot <- ggplot(filter(gwas_data, p < signCut, chr != 4), aes(x = bp_cum, y = -log10(p), 
                                   color = chr)) +
   geom_hline(yintercept = -log10(signCut), color = "grey40", linetype = "dashed") + 
-  geom_point(alpha = 0.75, size = 0.25) +
-  geom_point(data = filter(gwas_data, p > signCut), alpha = 0.75, size = 0.25, color = "grey") +
+  geom_point(alpha = 0.7, size = 0.005) +
+  geom_point(data = filter(gwas_data, p > signCut), alpha = 0.75, size = 0.005, color = "grey") +
   scale_x_continuous(label = axis_set$chr, breaks = axis_set$center) +
   scale_y_continuous(expand = c(0,0), limits = c(0, ylim), breaks = seq(0, 60, 10)) +
   scale_color_manual(values = rep(c("#276FBF", "#183059"), unique(length(axis_set$chr)))) +
   scale_size_continuous(range = c(0.5,3)) +
-  labs(x = "Chromossome", 
+  labs(x = "Chromosome", 
        y = expression("-log10(" ~ p[int] ~ ")")) + 
   theme_classic() +
   theme( 
@@ -102,7 +103,7 @@ chrs <- c('2L', '2R', '3L', '3R', '4', 'X', 'Y')
 binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in% chrs, ]
 
 plotFreqVsTime = function(f){
-  col.treat <- c('DarkOrange', '#8A2BE2')
+  col.treat <- c('#8A2BE2', 'DarkOrange')
   lf = f %>% 
     select(contains("_N")) %>% 
     pivot_longer(G25_N5:G100_N6) %>% 
@@ -144,7 +145,7 @@ f <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == 'X' & freqs.merg
 binGlmScan_contTime_param1234_200615 %>%
   filter(p_t < 10e-20, p_int > 0.05) %>% arrange(p_int, p_c, p_HS) %>% head(10)
 panelA <- freqs.merge_union_190426[freqs.merge_union_190426$CHROM == '2R' & freqs.merge_union_190426$POS == 11258278, ]
-save_plot("test.png", plotFreqVsTime(f1))
+save_plot("test.png", plotFreqVsTime(f))
 
 #only HS
 binGlmScan_contTime_param1234_200615 %>%
@@ -167,5 +168,20 @@ panel = (p1 + p2 + p3 + plot_layout(guides = 'collect')) / manhplot + ggtitle("D
 save_plot("figures/regressionExamples_manhattan_pInt_HSonly_cut8e-12.png", panel, 
           base_height = 4, base_width = 7.2)
 
+poster_theme = function() theme(
+          axis.text = element_text(size = 12), 
+          axis.title = element_text(size = 13),
+          legend.title = element_text(size = 13),
+          legend.text = element_text(size = 13))
 
+p1 = plotFreqVsTime(panelA) + poster_theme()
+p2 = plotFreqVsTime(panelB) + poster_theme()
+p3 = plotFreqVsTime(panelC) + poster_theme()
 
+library(patchwork)
+panel_poster = (p1 + p2 + p3 + plot_layout(guides = 'collect'))
+
+save_plot("figures/regressionExamples_poster.png", panel_poster, 
+          base_width = 28/2.54, base_height = 8/2.54)
+save_plot("figures/regressionManhattan_poster.png", manhplot + poster_theme(), 
+          base_width = 28/2.54, base_height = 7/2.54)
