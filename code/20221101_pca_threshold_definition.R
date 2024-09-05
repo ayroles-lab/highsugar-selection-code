@@ -1,7 +1,7 @@
 ########## 200727 #########
 #Redo the "what happens to the PCs?" analysis excluding the C only signals
-load('../data/190916_maf05SNPs_alleleFreqs.RData')
-load('../data/200618_binGlmScan_slopePerTreat_GRangesFormat.RData')
+load('data/190916_maf05SNPs_alleleFreqs.RData')
+load('data/200618_binGlmScan_slopePerTreat_GRangesFormat.RData')
 #Remove C only selection signals
 nonSignCut <- 1e-4
 p <- binGlmScan_contTime_param1234_200615.gr$`generation:treatment_p`
@@ -23,11 +23,15 @@ library(extrafont)
   titleCols <- brewer.pal(n = length(p_int), name = 'Spectral')
   col.treat <- c(wes_palette('Darjeeling1', 1), 'deepskyblue2')
   dat = vector("list", length(p_int))
+  n_removed = vector("numeric", length(p_int))
+  total_snps = length(binGlmScan_contTime_param1234_200615.gr@ranges@NAMES)
   for (i in 1:length(p_int)) {
     print(i)
     #Get SNPs
     keep <- p > p_int[i]
     keep.snps <- binGlmScan_contTime_param1234_200615.gr@ranges@NAMES[keep]
+    n_removed[i] = total_snps - sum(keep)
+    print(paste("Removed snps:", n_removed[i]))
 
     #PCA
     allAbove.freqs_keep <- allAbove.freqs[, colnames(allAbove.freqs) %in% keep.snps]
@@ -60,15 +64,16 @@ library(extrafont)
             axis.title=element_text(size=28,face="bold"),
             strip.text.y = element_text(size = 20)) +
       guides(colour=guide_legend(title="Treatment"), shape = guide_legend(title="Generation")) +
-      ggtitle(bquote(SNPs ~ with ~ p[int] ~ '>' ~ .(p_int[i]))) + theme_tufte()
+      ggtitle(bquote(Removed ~ .(n_removed[i]) ~ SNPs ~ with ~ p[int] ~ '>' ~ .(p_int[i]))) + 
+      theme_tufte()
       if(i < length(p_int)) g[[i]] = g[[i]] + theme(legend.position = "none")
   }
 }
 
 ######## New Manhatan plot 221103 ############
 # Fig 2D
-source("utils.R")
-load('../data/201001_alleFreqPC_allSNPs.RData')
+source("code/utils.R")
+load('data/201001_alleFreqPC_allSNPs.RData')
 summary(allSNPs.pc)
 
 library(wesanderson)
@@ -78,7 +83,7 @@ library(cowplot)
 library(grid)
 
 load(
-    "../data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData"
+    "data/200615_binGlmScan_contTimeParam1234_slopePerTreat.RData"
 )
 chrs <- c("2L", "2R", "3L", "3R", "4", "X")
 binGlmScan_contTime_param1234_200615 <- binGlmScan_contTime_param1234_200615[binGlmScan_contTime_param1234_200615$CHROM %in%
@@ -159,4 +164,4 @@ manhplot <- ggplot(gwas_data, aes(x = bp_cum, y = -log10(p),
   g[[6]] = manhplot
   g[[3]] = g[[3]] + theme(plot.background = element_rect(color = "tomato3", size = 3))
   panel_plot = plot_grid(plotlist = g, ncol = 2, nrow = 3, labels = LETTERS[1:6])
-  save_plot("../figures/sequential_PCA.png", panel_plot, base_height = 3.2, base_asp = 1.2, ncol = 2, nrow = 3)
+  save_plot("figures/sequential_PCA.png", panel_plot, base_height = 3.2, base_asp = 1.2, ncol = 2, nrow = 3)
