@@ -41,6 +41,11 @@ dat = tibble(id = rownames(G1_HS), HS1 = G1_HS[,1], HS2 = G1_HS[,2], HS3 = G1_HS
 
 names(dat)
 
+png("HS-selected-SFS.png")
+par(mfrow=c(1, 1))
+hist(1-dat$HS1[dat$selected], breaks = 20, main = "Observed Allele frequency distributio\nSelected sites", xlab = "Allele Frequency", prob = TRUE)
+dev.off()
+
 png("figures/af_selected_plot.png")
 ggplot(pivot_longer(dat, HS1:HS3, names_to = "pop", values_to = "af"), aes(selected, af, group = interaction(pop, selected))) + geom_boxplot() + facet_wrap(~pop) + labs(y = "Allele frequency at Generation 1", x = "Selected") +  theme_half_open(16) +   panel_border() +
   background_grid()
